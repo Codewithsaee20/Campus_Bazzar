@@ -1,14 +1,14 @@
 import express from "express";
-import { loginUser, registerUser, getUserProfile } from "../controllers/authController.js";
+import { login, register, getUserProfile } from "../controllers/authController.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
 // Register User
-router.post("/register", registerUser);
+router.post("/register", register);
 
 // Login User
-router.post("/login", loginUser);
+router.post("/login", login);
 
 // Get User Profile
 router.get("/profile", verifyToken, getUserProfile);

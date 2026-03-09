@@ -13,6 +13,8 @@ const cookieOptions = {
 // Register User
 const register = asyncHandler(async (req, res) => {
 
+    console.log("REQ BODY:", req.body)
+
     const { name, email, password, college } = req.body;
 
     if (!name || !email || !password || !college) {
@@ -22,16 +24,15 @@ const register = asyncHandler(async (req, res) => {
     const result = await registerUser({ name, email, password, college });
 
     return res
-        .status(201)
-        .cookie("accessToken", result.accessToken, cookieOptions)
-        .cookie("refreshToken", result.refreshToken, cookieOptions)
-        .json(
-            new ApiResponse(
-                201,
-                result.user,
-                "User registered successfully"
-            )
-        );
+    .status(201)
+    .cookie("accessToken", result.accessToken, cookieOptions)
+    .cookie("refreshToken", result.refreshToken, cookieOptions)
+    .json(
+        new ApiResponse(201, {
+            user: result.user,
+            accessToken: result.accessToken  // ← ADD THIS
+        }, "User registered successfully")
+    );
 });
 
 
@@ -47,16 +48,15 @@ const login = asyncHandler(async (req, res) => {
     const result = await loginUser({ email, password });
 
     return res
-        .status(200)
-        .cookie("accessToken", result.accessToken, cookieOptions)
-        .cookie("refreshToken", result.refreshToken, cookieOptions)
-        .json(
-            new ApiResponse(
-                200,
-                result.user,
-                "User logged in successfully"
-            )
-        );
+    .status(200)
+    .cookie("accessToken", result.accessToken, cookieOptions)
+    .cookie("refreshToken", result.refreshToken, cookieOptions)
+    .json(
+        new ApiResponse(200, {
+            user: result.user,
+            accessToken: result.accessToken  // ← ADD THIS
+        }, "User logged in successfully")
+    );
 });
 
 
@@ -75,7 +75,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
 });
 
 export {
-    registerUser,
-    loginUser,
+    register,
+    login,
     getUserProfile
 };

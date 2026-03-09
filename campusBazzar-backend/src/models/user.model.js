@@ -40,9 +40,13 @@ const userSchema = new mongoose.Schema(
     phone: {
       type: String,
       default: "",
-      minlength: 10,
-      maxlength: 15,
+      validate: {
+          validator: function(v) {
+          return v === "" || (v.length >= 10 && v.length <= 15);
     },
+    message: "Phone number must be between 10 and 15 digits"
+  }
+},
 
     role: {
       type: String,
@@ -65,15 +69,14 @@ const userSchema = new mongoose.Schema(
 
 
 // Hash password before saving
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
 
   if (!this.isModified("password")) {
-    return next();
+    return;
   }
 
   this.password = await bcrypt.hash(this.password, 12);
-  next();
-});
+})
 
 
 // Compare password
