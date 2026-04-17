@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import ThreeScene from './ThreeScene';
 
 const Hero = () => {
@@ -43,9 +44,9 @@ const Hero = () => {
               The ultimate closed-loop marketplace restricted to your college. Buy and sell secondhand books, past papers, and premium notes safely with verified peers.
             </p>
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              <a href="#login" className="btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.1rem' }}>
+              <Link to="/login" className="btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.1rem', textDecoration: 'none' }}>
                 Unified Login
-              </a>
+              </Link>
             </div>
           </motion.div>
 

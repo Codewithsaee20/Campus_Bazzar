@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 const CTA = () => {
   return (
@@ -42,9 +43,9 @@ const CTA = () => {
           <p style={{ fontSize: '1.25rem', color: '#a0a0c0', marginBottom: '3rem', maxWidth: '600px', margin: '0 auto 3rem' }}>
             Join thousands of trusted students. Register with your college email, verify your OTP, and start trading instantly.
           </p>
-          <button className="btn-primary" style={{ padding: '1.25rem 4rem', fontSize: '1.25rem' }}>
+          <Link to="/login" className="btn-primary" style={{ padding: '1.25rem 4rem', fontSize: '1.25rem', textDecoration: 'none' }}>
             Login to Campus Bazar
-          </button>
+          </Link>
         </motion.div>
       </div>
     </section>

@@ -1,30 +1,26 @@
 import React from 'react';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import Features from './components/Features';
-import Stats from './components/Stats';
-import CTA from './components/CTA';
-import ParticleField from './components/ParticleField';
+import { Routes, Route } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import SignUpPage from './pages/SignUpPage';
+import MarketplacePage from './pages/MarketplacePage';
+import SellPage from './pages/SellPage';
+import CartPage from './pages/CartPage';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   return (
-    <>
-      <div className="aurora-bg">
-        <div className="aurora-blob cyan" />
-        <div className="aurora-blob violet" />
-        <div className="aurora-blob pink" />
-      </div>
-      <ParticleField />
-      
-      <Navbar />
-      <main>
-        <Hero />
-        <Features />
-        <Stats />
-        <CTA />
-      </main>
-    </>
-  )
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignUpPage />} />
+      <Route path="/marketplace" element={<MarketplacePage />} />
+      <Route path="/browse" element={<MarketplacePage />} />
+      <Route path="/sell" element={<SellPage />} />
+      <Route path="/cart" element={<CartPage />} />
+      <Route path="/profile" element={<ProfilePage />} />
+    </Routes>
+  );
 }
 
 export default App;
