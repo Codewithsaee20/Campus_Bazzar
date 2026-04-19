@@ -1,81 +1,107 @@
-import { registerUser, loginUser, getUser } from "../services/authService.js";
+import {
+  registerUser,
+  sendOTP as sendOTPService,
+  verifyOTP as verifyOTPService,
+  logoutUser,
+  refreshUserAccessToken,
+  getProfileById,
+} from "../services/authService.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 
-const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax"
+const baseCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict",
 };
 
-
-// Register User
 const register = asyncHandler(async (req, res) => {
+  const { name, email, phone, department, branch } = req.body;
 
-    console.log("REQ BODY:", req.body)
+  if (!name || !email || !phone || !department || !branch) {
+    throw new ApiError(
+      400,
+      "Name, email, phone, department and branch are required"
+    );
+  }
 
-    const { name, email, password, college } = req.body;
+  await registerUser(name, email, phone, department, branch);
 
-    if (!name || !email || !password || !college) {
-        throw new ApiError("All fields are required", 400);
-    }
-
-    const result = await registerUser({ name, email, password, college });
-
-    return res
+  return res
     .status(201)
-    .cookie("accessToken", result.accessToken, cookieOptions)
-    .cookie("refreshToken", result.refreshToken, cookieOptions)
-    .json(
-        new ApiResponse(201, {
-            user: result.user,
-            accessToken: result.accessToken  // ← ADD THIS
-        }, "User registered successfully")
-    );
+    .json(new ApiResponse(201, {}, "OTP sent to your college email"));
 });
 
+const sendOTP = asyncHandler(async (req, res) => {
+  const { email } = req.body;
 
-// Login User
-const login = asyncHandler(async (req, res) => {
+  if (!email) {
+    throw new ApiError(400, "Email is required");
+  }
 
-    const { email, password } = req.body;
+  await sendOTPService(email);
 
-    if (!email || !password) {
-        throw new ApiError("Email and password are required", 400);
-    }
-
-    const result = await loginUser({ email, password });
-
-    return res
+  return res
     .status(200)
-    .cookie("accessToken", result.accessToken, cookieOptions)
-    .cookie("refreshToken", result.refreshToken, cookieOptions)
+    .json(new ApiResponse(200, {}, "OTP sent to your college email"));
+});
+
+const verifyOTP = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email || !otp) {
+    throw new ApiError(400, "Email and otp are required");
+  }
+
+  const { user, accessToken, refreshToken } = await verifyOTPService(email, otp);
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, {
+      ...baseCookieOptions,
+      maxAge: 15 * 60 * 1000,
+    })
+    .cookie("refreshToken", refreshToken, {
+      ...baseCookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
     .json(
-        new ApiResponse(200, {
-            user: result.user,
-            accessToken: result.accessToken  // ← ADD THIS
-        }, "User logged in successfully")
+      new ApiResponse(200, { user, accessToken }, "Logged in successfully")
     );
 });
 
+const logout = asyncHandler(async (req, res) => {
+  await logoutUser(req.user._id);
 
-// Get User Profile
-const getUserProfile = asyncHandler(async (req, res) => {
+  return res
+    .status(200)
+    .clearCookie("accessToken", baseCookieOptions)
+    .clearCookie("refreshToken", baseCookieOptions)
+    .json(new ApiResponse(200, {}, "Logged out successfully"));
+});
 
-    const user = await getUser(req.user._id);
+const refreshToken = asyncHandler(async (req, res) => {
+  const incomingRefreshToken = req.cookies?.refreshToken;
+  const { accessToken } = await refreshUserAccessToken(incomingRefreshToken);
 
-    return res.status(200).json(
-        new ApiResponse(
-            200,
-            user,
-            "User profile fetched successfully"
-        )
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, {
+      ...baseCookieOptions,
+      maxAge: 15 * 60 * 1000,
+    })
+    .json(
+      new ApiResponse(200, { accessToken }, "Token refreshed successfully")
     );
 });
 
-export {
-    register,
-    login,
-    getUserProfile
-};
+const getProfile = asyncHandler(async (req, res) => {
+  const user = await getProfileById(req.user._id);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { user }, "Profile fetched successfully"));
+});
+
+export { register, sendOTP, verifyOTP, logout, refreshToken, getProfile };
